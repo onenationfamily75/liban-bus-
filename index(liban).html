@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liban Bus Booking | Luxury Coach Reservations & Secure WhatsApp Confirmation</title>
+  <meta name="description" content="Official online luxury coach reservations across Kenya and East Africa with instant secure WhatsApp confirmation." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @media print {
+      body * { visibility: hidden; }
+      #printable-pass, #printable-pass * { visibility: visible; }
+      #printable-pass { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Icons
+    const BusIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 17h.01M16 17h.01M4 11h16M4 5h16a2 2 0 012 2v8a2 2 0 01-2 2h-1a2 2 0 01-2-2H7a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zm0 0l2-2h12l2 2" />
+      </svg>
+    );
+
+    const WhatsAppIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.031 2C6.511 2 2 6.484 2 12.004c0 1.954.563 3.778 1.536 5.327L2 22l4.823-1.503A9.972 9.972 0 0012.031 22C17.55 22 22 17.52 22 12.004 22 6.484 17.55 2 12.031 2zm5.787 14.364c-.244.686-1.42 1.258-1.958 1.332-.519.072-1.187.102-1.916-.133a17.91 17.91 0 01-4.043-1.996 11.233 11.233 0 01-3.155-3.693c-.456-.763-.487-1.42-.487-1.42s-.016-.628.232-1.018c.247-.39.544-.486.724-.486.182 0 .364.004.523.011.168.007.394-.064.615.467.227.545.772 1.884.84 2.02.068.136.113.295.023.477-.09.182-.136.295-.272.454-.136.159-.286.355-.409.477-.136.136-.279.284-.12.557.159.273.707 1.164 1.517 1.886 1.042.929 1.921 1.217 2.193 1.353.273.136.432.114.591-.068.16-.182.682-.795.864-1.068.182-.273.364-.227.614-.136.25.091 1.591.75 1.864.886.273.136.455.205.523.318.068.114.068.659-.176 1.345z" />
+      </svg>
+    );
+
+    const CloseIcon = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    );
+
+    const SearchIcon = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    );
+
+    const CITIES = [
+      'Nairobi', 'Garissa', 'Wajir', 'Mandera', 'Moyale', 'Addis Ababa',
+      'Isiolo', 'Marsabit', 'Kakuma', 'Lodwar', 'Nakuru', 'Eldoret'
+    ];
+
+    const BUS_ROUTES = [
+      {
+        id: 'LBN-101',
+        from: 'Nairobi',
+        to: 'Mandera',
+        departureTime: '06:30 AM',
+        duration: '13 hrs',
+        distanceKm: 1025,
+        priceKes: 3800,
+        travelClass: 'VIP Luxury',
+        coachName: 'Liban Royal Scania High-Deck',
+        coachNumber: 'KDH 892M',
+        availableSeats: 14,
+        amenities: ['Air Conditioning', 'Free Wi-Fi', 'Reclining Leather Seats', 'USB Charging', 'Prayer Stops']
+      },
+      {
+        id: 'LBN-102',
+        from: 'Nairobi',
+        to: 'Wajir',
+        departureTime: '07:00 AM',
+        duration: '9 hrs 30 mins',
+        distanceKm: 680,
+        priceKes: 2800,
+        travelClass: 'VIP Luxury',
+        coachName: 'Liban Prestige Express',
+        coachNumber: 'KDJ 441L',
+        availableSeats: 19,
+        amenities: ['Air Conditioning', 'Wi-Fi', 'VIP Recliners', 'Charging Ports', 'Water']
+      },
+      {
+        id: 'LBN-103',
+        from: 'Nairobi',
+        to: 'Garissa',
+        departureTime: '08:00 AM',
+        duration: '6 hrs',
+        distanceKm: 375,
+        priceKes: 1800,
+        travelClass: 'Business Class',
+        coachName: 'Liban Silver Star Cruiser',
+        coachNumber: 'KDE 302P',
+        availableSeats: 26,
+        amenities: ['Air Conditioning', 'Entertainment', 'Comfort Recliners']
+      },
+      {
+        id: 'LBN-104',
+        from: 'Nairobi',
+        to: 'Moyale',
+        departureTime: '06:00 AM',
+        duration: '11 hrs 30 mins',
+        distanceKm: 790,
+        priceKes: 3200,
+        travelClass: 'VIP Luxury',
+        coachName: 'Liban Trans-Desert VIP',
+        coachNumber: 'KDM 712K',
+        availableSeats: 11,
+        amenities: ['Air Conditioning', 'High-Speed Wi-Fi', 'Extra Legroom VIP', 'Cold Drinks']
+      },
+      {
+        id: 'LBN-105',
+        from: 'Nairobi',
+        to: 'Addis Ababa',
+        departureTime: '05:30 AM',
+        duration: 'Overnight Trans-Border',
+        distanceKm: 1530,
+        priceKes: 6500,
+        travelClass: 'VIP Luxury',
+        coachName: 'Liban International Continental Flagship',
+        coachNumber: 'KDG 990B',
+        availableSeats: 8,
+        amenities: ['Sleeper Recline', 'Border Fast-Track Support', 'Free Meals & Drinks', 'AC & Power']
+      },
+      {
+        id: 'LBN-106',
+        from: 'Nairobi',
+        to: 'Kakuma',
+        departureTime: '06:00 AM',
+        duration: '13 hrs',
+        distanceKm: 760,
+        priceKes: 3500,
+        travelClass: 'Business Class',
+        coachName: 'Liban Turkana Express',
+        coachNumber: 'KDF 581R',
+        availableSeats: 15,
+        amenities: ['Air Conditioning', 'Comfort Suspension', 'USB Outlets', 'Rest Stops']
+      }
+    ];
+
+    function generateSeats() {
+      const seats = [];
+      const booked = ['1A', '2B', '5A', '5B', '8C', '9D'];
+      for (let r = 1; r <= 11; r++) {
+        ['A', 'B', 'C', 'D'].forEach(c => {
+          const num = `${r}${c}`;
+          seats.push({
+            number: num,
+            row: r,
+            type: r <= 2 ? 'vip' : 'standard',
+            priceExtra: r <= 2 ? 400 : 0,
+            status: booked.includes(num) ? 'booked' : 'available'
+          });
+        });
+      }
+      return seats;
+    }
+
+    function createWhatsAppMessage(ref, code, route, date, seats, pass, total) {
+      return `*LIBAN BUS SERVICES - OFFICIAL TICKET RESERVATION*
+----------------------------------------
+*Booking Ref:* #${ref}
+*Verification Code:* ${code}
+*Status:* CONFIRMED / SEAT RESERVED
+
+*JOURNEY DETAILS*
+*From:* ${route.from} (${pass.boarding || 'Main Terminal'})
+*To:* ${route.to} (${pass.dropoff || 'Central Terminal'})
+*Departure Date:* ${date}
+*Departure Time:* ${route.departureTime}
+*Coach:* ${route.coachName} (${route.coachNumber})
+*Seats Booked:* [ ${seats.join(', ')} ]
+
+*PASSENGER INFORMATION*
+*Primary Traveler:* ${pass.name}
+*ID / Passport:* ${pass.idNo}
+*WhatsApp Contact:* ${pass.phone}
+*Emergency Contact:* ${pass.emName} (${pass.emPhone})
+
+*PAYMENT & FARE*
+*Total Fare:* KES ${total.toLocaleString()}
+*Paybill:* 522522
+*Account No:* ${ref}
+
+*INSTRUCTIONS:*
+1. Arrive at terminal 30 mins before departure with Government ID.
+2. 24/7 Hotline: +254 720 892 000 | Eastleigh Central Hub.`;
+    }
+
+    function App() {
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [isLookupOpen, setIsLookupOpen] = useState(false);
+      const [step, setStep] = useState(1);
+      const [from, setFrom] = useState('Nairobi');
+      const [to, setTo] = useState('Mandera');
+      const today = new Date().toISOString().split('T')[0];
+      const [date, setDate] = useState(today);
+      const [selectedRoute, setSelectedRoute] = useState(BUS_ROUTES[0]);
+      const [seats, setSeats] = useState(generateSeats());
+      const [selectedSeats, setSelectedSeats] = useState(['1B']);
+      const [passenger, setPassenger] = useState({
+        name: '', phone: '', idNo: '', emName: '', emPhone: '', boarding: 'Eastleigh Central Hub', dropoff: ''
+      });
+      const [formErrors, setFormErrors] = useState({});
+      const [completedBooking, setCompletedBooking] = useState(null);
+      const [uiWarning, setUiWarning] = useState(null);
+      const [copied, setCopied] = useState(false);
+      const [lookupQuery, setLookupQuery] = useState('');
+      const [lookupResult, setLookupResult] = useState(null);
+      const [hasSearched, setHasSearched] = useState(false);
+
+      const warn = (msg) => {
+        setUiWarning(msg);
+        setTimeout(() => setUiWarning(null), 3500);
+      };
+
+      const handleSeatClick = (seat) => {
+        if (seat.status === 'booked') return;
+        if (selectedSeats.includes(seat.number)) {
+          setSelectedSeats(selectedSeats.filter(s => s !== seat.number));
+        } else {
+          if (selectedSeats.length >= 4) {
+            warn('Maximum 4 seats per booking transaction.');
+            return;
+          }
+          setSelectedSeats([...selectedSeats, seat.number]);
+        }
+      };
+
+      const calculateTotal = () => {
+        if (!selectedRoute) return 0;
+        let total = selectedRoute.priceKes * selectedSeats.length;
+        selectedSeats.forEach(s => {
+          const match = seats.find(item => item.number === s);
+          if (match && match.type === 'vip') total += 400;
+        });
+        return total;
+      };
+
+      const handleProceedToStep4 = () => {
+        const errs = {};
+        if (!passenger.name.trim()) errs.name = 'Full legal name required';
+        if (!passenger.phone.trim()) errs.phone = 'WhatsApp contact required';
+        if (!passenger.idNo.trim()) errs.idNo = 'National ID or Passport required';
+        if (!passenger.emName.trim()) errs.emName = 'Emergency contact required';
+        if (!passenger.emPhone.trim()) errs.emPhone = 'Emergency phone required';
+        
+        if (Object.keys(errs).length > 0) {
+          setFormErrors(errs);
+          return;
+        }
+
+        const ref = `LBN-${Math.floor(10000 + Math.random() * 90000)}`;
+        const code = `SEC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        const total = calculateTotal();
+        const msg = createWhatsAppMessage(ref, code, selectedRoute, date, selectedSeats, passenger, total);
+
+        const record = {
+          ref, code, route: selectedRoute, date, seats: selectedSeats, passenger, total, msg
+        };
+
+        try {
+          const existing = JSON.parse(localStorage.getItem('liban_bus_bookings') || '[]');
+          existing.unshift(record);
+          localStorage.setItem('liban_bus_bookings', JSON.stringify(existing));
+        } catch(e){}
+
+        setCompletedBooking(record);
+        setStep(4);
+      };
+
+      const handleSearchTicket = (e) => {
+        e.preventDefault();
+        setHasSearched(true);
+        const q = lookupQuery.trim().toUpperCase();
+        if (!q) return;
+        try {
+          const list = JSON.parse(localStorage.getItem('liban_bus_bookings') || '[]');
+          const match = list.find(item => 
+            item.ref.includes(q) || item.passenger.phone.includes(q) || item.passenger.idNo.toUpperCase().includes(q)
+          );
+          setLookupResult(match || null);
+        } catch(e){
+          setLookupResult(null);
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+            <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-8">
+              <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <BusIcon />
+                </div>
+                <span>Liban <span className="text-amber-400">Bus Booking</span></span>
+              </div>
+
+              <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+                <a href="#routes" className="hover:text-amber-400 transition-colors">Routes & Schedules</a>
+                <a href="#fleet" className="hover:text-amber-400 transition-colors">VIP Fleet</a>
+                <button onClick={() => setIsLookupOpen(true)} className="flex items-center gap-1.5 text-amber-400 hover:underline">
+                  <SearchIcon /> <span>Verify Ticket</span>
+                </button>
+              </nav>
+
+              <button
+                onClick={() => { setStep(1); setIsModalOpen(true); }}
+                className="px-5 py-2.5 text-sm font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <BusIcon className="w-4 h-4" />
+                <span>Reserve Seat</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Hero */}
+          <section className="relative py-20 px-4 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-slate-800">
+            <div className="max-w-5xl mx-auto text-center space-y-6">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+                Official Kenya & East Africa Coach Reservations
+              </div>
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight">
+                Travel in <span className="text-amber-400">Executive VIP Luxury</span> with Instant WhatsApp Confirmation
+              </h1>
+              <p className="text-slate-300 max-w-2xl mx-auto text-base sm:text-lg">
+                Daily scheduled luxury departures connecting Nairobi, Mandera, Wajir, Garissa, Moyale, Kakuma, and Addis Ababa.
+              </p>
+
+              {/* Quick Search Strip */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl text-left max-w-4xl mx-auto mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">From</label>
+                    <select value={from} onChange={e=>setFrom(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                      {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">To</label>
+                    <select value={to} onChange={e=>setTo(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                      {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Travel Date</label>
+                    <input type="date" value={date} min={today} onChange={e=>setDate(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white" />
+                  </div>
+                  <button
+                    onClick={() => {
+                      const match = BUS_ROUTES.find(r => r.from === from && r.to === to) || BUS_ROUTES[0];
+                      setSelectedRoute(match);
+                      setStep(1);
+                      setIsModalOpen(true);
+                    }}
+                    className="w-full h-[38px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm rounded-lg flex items-center justify-center gap-1.5"
+                  >
+                    Find Coach & Book
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Popular Routes */}
+          <section id="routes" className="py-16 px-4 max-w-7xl mx-auto w-full">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-8">Popular Scheduled Routes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {BUS_ROUTES.map(r => (
+                <div key={r.id} className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-amber-400">
+                      <span className="font-mono bg-slate-800 px-2 py-0.5 rounded">{r.id}</span>
+                      <span>{r.travelClass}</span>
+                    </div>
+                    <div className="flex items-center justify-between font-bold text-lg text-white">
+                      <span>{r.from}</span>
+                      <span className="text-xs text-slate-400 font-normal">→</span>
+                      <span>{r.to}</span>
+                    </div>
+                    <p className="text-xs text-slate-400">{r.coachName} · {r.departureTime} · {r.duration}</p>
+                  </div>
+                  <div className="mt-5 pt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span className="text-lg font-bold text-white">KES {r.priceKes.toLocaleString()}</span>
+                    <button
+                      onClick={() => { setSelectedRoute(r); setStep(2); setIsModalOpen(true); }}
+                      className="px-3.5 py-1.5 text-xs font-bold bg-amber-400 text-slate-950 rounded-lg hover:bg-amber-300"
+                    >
+                      Reserve Seat
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Booking Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+              <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden my-6">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/70">
+                  <div className="flex items-center gap-2">
+                    <BusIcon className="text-amber-400" />
+                    <h3 className="font-bold text-white text-base">Liban Bus Ticket Reservation</h3>
+                    <span className="text-xs text-slate-400 ml-2">Step {step} of 4</span>
+                  </div>
+                  <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white">
+                    <CloseIcon />
+                  </button>
+                </div>
+
+                {uiWarning && (
+                  <div className="m-4 p-3 bg-amber-500/20 border border-amber-500/40 rounded-lg text-amber-300 text-xs">
+                    {uiWarning}
+                  </div>
+                )}
+
+                <div className="p-6 max-h-[75vh] overflow-y-auto space-y-6">
+                  {step === 1 && (
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">Select Coach Schedule</h4>
+                      <div className="space-y-3">
+                        {BUS_ROUTES.map(r => (
+                          <div
+                            key={r.id}
+                            onClick={() => setSelectedRoute(r)}
+                            className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                              selectedRoute?.id === r.id ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-950/40 border-slate-800'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h5 className="font-bold text-white text-sm">{r.from} → {r.to} ({r.coachName})</h5>
+                                <p className="text-xs text-slate-400">{r.departureTime} · {r.travelClass}</p>
+                              </div>
+                              <span className="text-base font-bold text-amber-400">KES {r.priceKes.toLocaleString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-right pt-4">
+                        <button
+                          onClick={() => setStep(2)}
+                          className="px-6 py-2.5 bg-amber-400 text-slate-950 font-bold text-sm rounded-lg hover:bg-amber-300"
+                        >
+                          Proceed to Seat Selection →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between p-3 bg-slate-950 rounded-lg text-xs">
+                        <span>Coach: <strong>{selectedRoute.coachName}</strong></span>
+                        <span>Selected: <strong className="text-amber-400">{selectedSeats.join(', ') || 'None'}</strong></span>
+                        <span>Total: <strong className="text-amber-400">KES {calculateTotal().toLocaleString()}</strong></span>
+                      </div>
+
+                      {/* Coach Layout */}
+                      <div className="max-w-xs mx-auto bg-slate-950 p-4 border border-slate-800 rounded-2xl space-y-2">
+                        <div className="text-center text-xs text-slate-500 pb-2 border-b border-slate-800">
+                          --- Driver Cockpit & Windshield ---
+                        </div>
+                        {Array.from({ length: 11 }).map((_, rIdx) => {
+                          const r = rIdx + 1;
+                          const seatA = seats.find(s => s.number === `${r}A`);
+                          const seatB = seats.find(s => s.number === `${r}B`);
+                          const seatC = seats.find(s => s.number === `${r}C`);
+                          const seatD = seats.find(s => s.number === `${r}D`);
+                          
+                          const renderBtn = (s) => {
+                            if (!s) return null;
+                            const isSel = selectedSeats.includes(s.number);
+                            const isBooked = s.status === 'booked';
+                            return (
+                              <button
+                                type="button"
+                                disabled={isBooked}
+                                onClick={() => handleSeatClick(s)}
+                                className={`w-8 h-8 rounded text-xs font-bold transition-all ${
+                                  isBooked ? 'bg-slate-800/40 text-slate-600' :
+                                  isSel ? 'bg-amber-400 text-slate-950' :
+                                  r <= 2 ? 'border border-amber-500/60 text-amber-300' : 'bg-slate-800 text-slate-200'
+                                }`}
+                              >
+                                {s.number}
+                              </button>
+                            );
+                          };
+
+                          return (
+                            <div key={r} className="flex items-center justify-between">
+                              <div className="flex gap-1.5">{renderBtn(seatA)}{renderBtn(seatB)}</div>
+                              <span className="text-[10px] text-slate-600 font-mono">{r}</span>
+                              <div className="flex gap-1.5">{renderBtn(seatC)}{renderBtn(seatD)}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <button onClick={() => setStep(1)} className="text-xs text-slate-400 hover:text-white">← Change Coach</button>
+                        <button
+                          onClick={() => {
+                            if (selectedSeats.length === 0) return warn('Please pick at least one seat');
+                            setStep(3);
+                          }}
+                          className="px-6 py-2.5 bg-amber-400 text-slate-950 font-bold text-sm rounded-lg hover:bg-amber-300"
+                        >
+                          Proceed to Passenger Info →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">Passenger Travel Manifest</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="text-slate-400 block mb-1">Full Legal Name *</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Abdirahman Hassan Mohamed"
+                            value={passenger.name}
+                            onChange={e=>setPassenger({...passenger, name: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white"
+                          />
+                          {formErrors.name && <span className="text-rose-400 text-[11px]">{formErrors.name}</span>}
+                        </div>
+                        <div>
+                          <label className="text-slate-400 block mb-1">WhatsApp Phone Number *</label>
+                          <input
+                            type="tel"
+                            placeholder="+254 722 000 000"
+                            value={passenger.phone}
+                            onChange={e=>setPassenger({...passenger, phone: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white"
+                          />
+                          {formErrors.phone && <span className="text-rose-400 text-[11px]">{formErrors.phone}</span>}
+                        </div>
+                        <div>
+                          <label className="text-slate-400 block mb-1">National ID / Passport No. *</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 34892110 or Passport"
+                            value={passenger.idNo}
+                            onChange={e=>setPassenger({...passenger, idNo: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white uppercase"
+                          />
+                          {formErrors.idNo && <span className="text-rose-400 text-[11px]">{formErrors.idNo}</span>}
+                        </div>
+                        <div>
+                          <label className="text-slate-400 block mb-1">Boarding Office</label>
+                          <input
+                            type="text"
+                            value={passenger.boarding}
+                            onChange={e=>setPassenger({...passenger, boarding: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-slate-400 block mb-1">Emergency Contact Name *</label>
+                          <input
+                            type="text"
+                            placeholder="Next of kin"
+                            value={passenger.emName}
+                            onChange={e=>setPassenger({...passenger, emName: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white"
+                          />
+                          {formErrors.emName && <span className="text-rose-400 text-[11px]">{formErrors.emName}</span>}
+                        </div>
+                        <div>
+                          <label className="text-slate-400 block mb-1">Emergency Contact Phone *</label>
+                          <input
+                            type="tel"
+                            placeholder="+254 711 000 000"
+                            value={passenger.emPhone}
+                            onChange={e=>setPassenger({...passenger, emPhone: e.target.value})}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-white"
+                          />
+                          {formErrors.emPhone && <span className="text-rose-400 text-[11px]">{formErrors.emPhone}</span>}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <button onClick={() => setStep(2)} className="text-xs text-slate-400 hover:text-white">← Back to Seats</button>
+                        <button
+                          onClick={handleProceedToStep4}
+                          className="px-6 py-2.5 bg-emerald-500 text-slate-950 font-bold text-sm rounded-lg hover:bg-emerald-400"
+                        >
+                          Confirm & Generate WhatsApp Pass →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 4 && completedBooking && (
+                    <div className="space-y-5" id="printable-pass">
+                      <div className="p-4 bg-emerald-950/60 border border-emerald-500/40 rounded-xl flex items-center justify-between">
+                        <div>
+                          <span className="text-xs uppercase text-emerald-400 font-bold">Booking Confirmed</span>
+                          <h4 className="text-xl font-bold text-white">#{completedBooking.ref}</h4>
+                          <p className="text-xs text-slate-300">Seats: {completedBooking.seats.join(', ')} · Fare: KES {completedBooking.total.toLocaleString()}</p>
+                        </div>
+                        <div className="text-right text-xs text-slate-400">
+                          <span>Token: {completedBooking.code}</span>
+                        </div>
+                      </div>
+
+                      <div className="p-5 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-white">
+                          <WhatsAppIcon className="text-emerald-400" />
+                          <span>Direct WhatsApp Confirmation Link</span>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          Click below to open WhatsApp with your ticket manifest sent directly to our 24/7 reservation desk (+254 720 892 000).
+                        </p>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <a
+                            href={`https://api.whatsapp.com/send?phone=254720892000&text=${encodeURIComponent(completedBooking.msg)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg inline-flex items-center gap-2"
+                          >
+                            <WhatsAppIcon className="w-4 h-4" /> Open WhatsApp Confirmation
+                          </a>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(completedBooking.msg);
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            }}
+                            className="px-4 py-2.5 bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg hover:bg-slate-700"
+                          >
+                            {copied ? 'Copied Message!' : 'Copy Ticket Text'}
+                          </button>
+                          <button
+                            onClick={() => window.print()}
+                            className="px-4 py-2.5 bg-amber-400 text-slate-950 font-bold text-xs rounded-lg hover:bg-amber-300"
+                          >
+                            Print Boarding Pass
+                          </button>
+                        </div>
+                      </div>
+
+                      <pre className="p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-emerald-400 font-mono overflow-x-auto whitespace-pre-wrap max-h-48">
+                        {completedBooking.msg}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Ticket Verification Modal */}
+          {isLookupOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+              <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base">Verify / Retrieve Ticket</h3>
+                  <button onClick={() => setIsLookupOpen(false)} className="text-slate-400 hover:text-white"><CloseIcon /></button>
+                </div>
+                <form onSubmit={handleSearchTicket} className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Booking ID or Phone (e.g. LBN-89241)"
+                    value={lookupQuery}
+                    onChange={e=>setLookupQuery(e.target.value)}
+                    className="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white uppercase"
+                  />
+                  <button type="submit" className="px-4 py-2 bg-amber-400 text-slate-950 font-bold text-xs rounded-lg hover:bg-amber-300">
+                    Verify
+                  </button>
+                </form>
+
+                {hasSearched && (
+                  lookupResult ? (
+                    <div className="p-4 bg-slate-950 border border-emerald-500/40 rounded-xl text-xs space-y-2">
+                      <span className="text-emerald-400 font-bold">Active Reservation: #{lookupResult.ref}</span>
+                      <p><strong>Passenger:</strong> {lookupResult.passenger.name}</p>
+                      <p><strong>Route:</strong> {lookupResult.route.from} → {lookupResult.route.to}</p>
+                      <p><strong>Seats:</strong> {lookupResult.seats.join(', ')}</p>
+                      <div className="pt-2">
+                        <a
+                          href={`https://api.whatsapp.com/send?phone=254720892000&text=${encodeURIComponent(lookupResult.msg)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full text-center block py-2 bg-emerald-500 text-slate-950 font-bold rounded-lg"
+                        >
+                          Re-send to WhatsApp Desk
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-400">
+                      No local reservation found. Please contact our 24/7 hotline at +254 720 892 000.
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="mt-auto py-8 border-t border-slate-800 text-center text-xs text-slate-500">
+            <p>© {new Date().getFullYear()} Liban Bus Services Ltd · Official Luxury Passenger Network</p>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
